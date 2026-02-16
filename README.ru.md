@@ -1,53 +1,49 @@
-# codewiki-mcp
+<div align="center">
 
-MCP-сервер для [codewiki.google](https://codewiki.google) — поиск, получение wiki-документации и вопросы по любому open-source репозиторию.
+# 📚 codewiki-mcp
 
-[English version](README.md)
+**MCP-сервер для codewiki.google — поиск, документация и вопросы по любому open-source репозиторию**
 
-## Возможности
+[![CI](https://github.com/nicholasxwang/codewiki-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/nicholasxwang/codewiki-mcp/actions/workflows/ci.yml)
+[![Release](https://github.com/nicholasxwang/codewiki-mcp/actions/workflows/release.yml/badge.svg)](https://github.com/nicholasxwang/codewiki-mcp/actions/workflows/release.yml)
+[![npm version](https://img.shields.io/npm/v/codewiki-mcp.svg?style=flat&colorA=18181B&colorB=28CF8D)](https://www.npmjs.com/package/codewiki-mcp)
+[![npm downloads](https://img.shields.io/npm/dm/codewiki-mcp.svg?style=flat&colorA=18181B&colorB=28CF8D)](https://www.npmjs.com/package/codewiki-mcp)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=flat&colorA=18181B&colorB=28CF8D)](LICENSE)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue?style=flat&colorA=18181B&colorB=3178C6)](https://www.typescriptlang.org/)
+[![Node.js](https://img.shields.io/badge/Node.js-ESM-green?style=flat&colorA=18181B&colorB=339933)](https://nodejs.org/)
 
-- **3 MCP-инструмента**: поиск репозиториев, получение wiki-контента, вопросы с историей диалога
-- **Множественные транспорты**: stdio (по умолчанию), Streamable HTTP, SSE
-- **NLP-резолвинг репозиториев**: естественный язык → поиск по GitHub → `owner/repo` (через wink-nlp)
-- **Retry с exponential backoff**: настраиваемые повторные запросы
-- **Структурированные ошибки**: типизированные коды (`VALIDATION`, `RPC_FAIL`, `TIMEOUT`, `NLP_RESOLVE_FAIL`)
-- **Метаданные ответов**: размер в байтах и время выполнения в каждом ответе
-- **Docker**: multi-stage Alpine-сборка
-- **Claude Code skill**: промпт-шаблоны, воркфлоу-цепочки, гайд по обработке ошибок
+**🇷🇺 Русский** | [🇬🇧 English](README.md)
 
-## Использование
+<br />
 
-Промпты, которые можно использовать в любом MCP-совместимом клиенте:
+*MCP-сервер, подключающий любого AI-ассистента к [codewiki.google](https://codewiki.google) — сервису генерации wiki-документации для open-source репозиториев.*
 
-```
-codewiki fetch как устроен роутинг в Next.js
-```
+</div>
 
-```
-codewiki search библиотеки для управления состоянием
-```
+---
 
-```
-codewiki ask как работает fiber reconciler в React?
-```
+## 📖 Обзор
 
-Получить полную документацию:
-```
-codewiki fetch vercel/next.js
-codewiki fetch https://github.com/fastify/fastify
-```
+**codewiki-mcp** — это [Model Context Protocol](https://modelcontextprotocol.io/) сервер, который даёт AI-ассистентам доступ к **codewiki.google** — сервису, генерирующему подробную wiki-документацию для любого GitHub-репозитория. Ищите репозитории, получайте полную документацию или задавайте вопросы на естественном языке — всё через MCP.
 
-Получить структурированные страницы:
-```
-codewiki fetch pages tailwindlabs/tailwindcss
-```
+---
 
-Задать вопрос:
-```
-codewiki ask fastify как добавить аутентификацию?
-```
+## ✨ Возможности
 
-## Быстрый старт
+| Фича | Описание |
+|------|----------|
+| 🔍 **Поиск репозиториев** | Поиск по индексу codewiki.google |
+| 📄 **Получение wiki-документации** | Полный markdown или структурированные страницы |
+| 💬 **Вопросы по репозиторию** | Q&A на естественном языке с историей диалога |
+| 🧠 **NLP-резолвинг** | Пишите на естественном языке — wink-nlp извлечёт ключевые слова и найдёт `owner/repo` |
+| 📡 **Множественные транспорты** | stdio (по умолчанию), Streamable HTTP, SSE |
+| 🔄 **Retry с backoff** | Автоматические повторы с exponential backoff при 5xx ошибках |
+| 🐳 **Docker** | Multi-stage Alpine-сборка |
+| 📊 **Метаданные ответов** | Размер в байтах и время выполнения в каждом ответе |
+
+---
+
+## 🚀 Быстрый старт
 
 ### Через npx (без установки)
 
@@ -64,25 +60,20 @@ npm install
 npm run build
 ```
 
-### stdio (по умолчанию)
+### Транспорты
 
 ```bash
+# stdio (по умолчанию)
 node dist/cli.js
-```
 
-### HTTP
-
-```bash
+# Streamable HTTP
 node dist/cli.js --http --port 3000
-```
 
-### SSE
-
-```bash
+# SSE
 node dist/cli.js --sse --port 3001
 ```
 
-### Docker
+### 🐳 Docker
 
 ```bash
 docker build -t codewiki-mcp .
@@ -101,11 +92,14 @@ docker run -p 3000:3000 \
   codewiki-mcp --http
 ```
 
-## Настройка MCP-клиентов
+---
 
-### Cursor
+## 🔧 Настройка MCP-клиентов
 
-Добавьте в `.cursor/mcp.json` (или используйте встроенный):
+<details>
+<summary><b>Cursor</b></summary>
+
+Добавьте в `.cursor/mcp.json`:
 
 ```json
 {
@@ -118,7 +112,10 @@ docker run -p 3000:3000 \
 }
 ```
 
-### Claude Desktop
+</details>
+
+<details>
+<summary><b>Claude Desktop</b></summary>
 
 Добавьте в `claude_desktop_config.json`:
 
@@ -133,13 +130,19 @@ docker run -p 3000:3000 \
 }
 ```
 
-### Claude Code
+</details>
+
+<details>
+<summary><b>Claude Code</b></summary>
 
 ```bash
 claude mcp add codewiki-mcp -- npx -y codewiki-mcp@latest
 ```
 
-### Windsurf
+</details>
+
+<details>
+<summary><b>Windsurf</b></summary>
 
 Добавьте в конфигурацию Windsurf MCP:
 
@@ -154,7 +157,10 @@ claude mcp add codewiki-mcp -- npx -y codewiki-mcp@latest
 }
 ```
 
-### VS Code (Copilot)
+</details>
+
+<details>
+<summary><b>VS Code (Copilot)</b></summary>
 
 Добавьте в `.vscode/mcp.json`:
 
@@ -169,7 +175,10 @@ claude mcp add codewiki-mcp -- npx -y codewiki-mcp@latest
 }
 ```
 
-### Локальная разработка
+</details>
+
+<details>
+<summary><b>Локальная разработка</b></summary>
 
 ```json
 {
@@ -182,39 +191,83 @@ claude mcp add codewiki-mcp -- npx -y codewiki-mcp@latest
 }
 ```
 
-## MCP-инструменты
+</details>
 
-### codewiki_search_repos
+---
+
+## 💡 Использование
+
+Промпты для любого MCP-совместимого клиента:
+
+```
+codewiki fetch как устроен роутинг в Next.js
+```
+
+```
+codewiki search библиотеки для управления состоянием
+```
+
+```
+codewiki ask как работает fiber reconciler в React?
+```
+
+Получить полную документацию:
+
+```
+codewiki fetch vercel/next.js
+codewiki fetch https://github.com/fastify/fastify
+```
+
+Получить структурированные страницы:
+
+```
+codewiki fetch pages tailwindlabs/tailwindcss
+```
+
+Задать вопрос:
+
+```
+codewiki ask fastify как добавить аутентификацию?
+```
+
+---
+
+## 🛠️ MCP-инструменты
+
+### 🔍 codewiki_search_repos
 
 Поиск репозиториев, проиндексированных codewiki.google.
 
 | Параметр | Тип | Обязательный | По умолчанию | Описание |
-|----------|-----|--------------|--------------|----------|
-| `query` | string | да | — | Поисковый запрос |
-| `limit` | number | нет | 10 | Макс. результатов (1–50) |
+|----------|-----|:------------:|--------------|----------|
+| `query` | string | ✅ | — | Поисковый запрос |
+| `limit` | number | — | 10 | Макс. результатов (1–50) |
 
-### codewiki_fetch_repo
+### 📄 codewiki_fetch_repo
 
 Получение сгенерированного wiki-контента для репозитория.
 
 | Параметр | Тип | Обязательный | По умолчанию | Описание |
-|----------|-----|--------------|--------------|----------|
-| `repo` | string | да | — | `owner/repo`, URL на GitHub или запрос на естественном языке |
-| `mode` | string | нет | `"aggregate"` | `"aggregate"` — полный markdown; `"pages"` — структурированный JSON |
+|----------|-----|:------------:|--------------|----------|
+| `repo` | string | ✅ | — | `owner/repo`, URL на GitHub или запрос на естественном языке |
+| `mode` | string | — | `"aggregate"` | `"aggregate"` — полный markdown; `"pages"` — структурированный JSON |
 
-### codewiki_ask_repo
+### 💬 codewiki_ask_repo
 
 Вопрос на естественном языке о репозитории.
 
 | Параметр | Тип | Обязательный | По умолчанию | Описание |
-|----------|-----|--------------|--------------|----------|
-| `repo` | string | да | — | Идентификатор репозитория (те же форматы, что и fetch) |
-| `question` | string | да | — | Вопрос о репозитории |
-| `history` | array | нет | `[]` | История диалога `[{role, content}]` (макс. 20) |
+|----------|-----|:------------:|--------------|----------|
+| `repo` | string | ✅ | — | Идентификатор репозитория (те же форматы, что и fetch) |
+| `question` | string | ✅ | — | Вопрос о репозитории |
+| `history` | array | — | `[]` | История диалога `[{role, content}]` (макс. 20) |
 
-## Формат ответов
+---
 
-### Успех — Поиск
+## 📊 Формат ответов
+
+<details>
+<summary><b>✅ Успех — Поиск</b></summary>
 
 ```json
 {
@@ -236,7 +289,10 @@ claude mcp add codewiki-mcp -- npx -y codewiki-mcp@latest
 }
 ```
 
-### Успех — Fetch (режим pages)
+</details>
+
+<details>
+<summary><b>✅ Успех — Fetch (режим pages)</b></summary>
 
 ```json
 {
@@ -259,7 +315,10 @@ claude mcp add codewiki-mcp -- npx -y codewiki-mcp@latest
 }
 ```
 
-### Успех — Ask
+</details>
+
+<details>
+<summary><b>✅ Успех — Ask</b></summary>
 
 ```json
 {
@@ -271,7 +330,10 @@ claude mcp add codewiki-mcp -- npx -y codewiki-mcp@latest
 }
 ```
 
-### Ответ с ошибкой
+</details>
+
+<details>
+<summary><b>❌ Ответ с ошибкой</b></summary>
 
 ```json
 {
@@ -284,47 +346,20 @@ claude mcp add codewiki-mcp -- npx -y codewiki-mcp@latest
 }
 ```
 
-### Прямые API-вызовы (HTTP-транспорт)
+Коды ошибок: `VALIDATION`, `RPC_FAIL`, `TIMEOUT`, `NLP_RESOLVE_FAIL`
 
-```bash
-# Запустить сервер
-node dist/cli.js --http --port 3000
+</details>
 
-# Поиск
-curl -X POST http://localhost:3000/mcp \
-  -H "Content-Type: application/json" \
-  -d '{
-    "jsonrpc": "2.0",
-    "id": 1,
-    "method": "tools/call",
-    "params": {
-      "name": "codewiki_search_repos",
-      "arguments": { "query": "fastify", "limit": 5 }
-    }
-  }'
+---
 
-# Получить wiki
-curl -X POST http://localhost:3000/mcp \
-  -H "Content-Type: application/json" \
-  -d '{
-    "jsonrpc": "2.0",
-    "id": 2,
-    "method": "tools/call",
-    "params": {
-      "name": "codewiki_fetch_repo",
-      "arguments": { "repo": "fastify/fastify", "mode": "pages" }
-    }
-  }'
-```
-
-## Как это работает
+## ⚙️ Как это работает
 
 ### Поток данных
 
 ```
-Claude Code → MCP протокол → codewiki-mcp → HTTPS → codewiki.google
-                                                          ↓
-Claude Code ← MCP протокол ← codewiki-mcp ← JSON  ← Google RPC API
+AI-ассистент → MCP протокол → codewiki-mcp → HTTPS → codewiki.google
+                                                            ↓
+AI-ассистент ← MCP протокол ← codewiki-mcp ← JSON  ← Google RPC API
 ```
 
 ### Google Batchexecute RPC
@@ -337,11 +372,14 @@ codewiki.google использует внутренний Google-формат AP
 4. Парсит `wrb.fr`-фреймы и извлекает типизированный payload
 
 Каждый инструмент использует свой RPC ID:
-- `vyWDAf` — поиск
-- `VSX6ub` — получение wiki
-- `EgIxfe` — вопрос-ответ
 
-### NLP-резолвинг репозиториев
+| Инструмент | RPC ID |
+|------------|:------:|
+| 🔍 Поиск | `vyWDAf` |
+| 📄 Fetch | `VSX6ub` |
+| 💬 Вопрос | `EgIxfe` |
+
+### 🧠 NLP-резолвинг репозиториев
 
 Пользователь может написать не только `owner/repo`, но и текст на естественном языке:
 
@@ -353,20 +391,20 @@ codewiki.google использует внутренний Google-формат AP
   → normalizeRepoInput("fastify/fastify") → URL для codewiki
 ```
 
-### Retry с exponential backoff
+### 🔄 Retry с exponential backoff
 
-При 5xx ошибках или таймаутах клиент автоматически повторяет запрос:
+| Попытка | Задержка |
+|:-------:|---------:|
+| 0 | сразу |
+| 1 | 250мс |
+| 2 | 500мс |
+| 3 | 1000мс |
 
-```
-Попытка 0: сразу
-Попытка 1: через 250мс
-Попытка 2: через 500мс
-Попытка 3: через 1000мс
-```
+> На 4xx ошибки (клиентские) retry не делается — бессмысленно.
 
-На 4xx ошибки (клиентские) retry не делается — бессмысленно.
+---
 
-## CLI
+## 🖥️ CLI
 
 ```
 codewiki-mcp [опции]
@@ -379,7 +417,9 @@ codewiki-mcp [опции]
   --help, -h       Показать справку
 ```
 
-## Конфигурация
+---
+
+## ⚡ Конфигурация
 
 Переменные окружения:
 
@@ -399,19 +439,9 @@ CODEWIKI_MAX_RETRIES=5
 GITHUB_TOKEN=ghp_your_token
 ```
 
-## Разработка
+---
 
-```bash
-npm run dev          # stdio через tsx
-npm run dev:http     # HTTP через tsx
-npm run dev:sse      # SSE через tsx
-npm run typecheck    # проверка типов
-npm run test         # запуск тестов
-npm run test:watch   # тесты в watch-режиме
-npm run build        # сборка в dist/
-```
-
-## Структура проекта
+## 📁 Структура проекта
 
 ```
 src/
@@ -433,22 +463,31 @@ src/
     └── askRepo.ts          # codewiki_ask_repo
 ```
 
-## Решение проблем
+---
 
-### Permission Denied
+## ❓ Решение проблем
+
+<details>
+<summary><b>Permission Denied</b></summary>
 
 ```bash
 chmod +x ./node_modules/.bin/codewiki-mcp
 ```
 
-### Connection Refused (HTTP/SSE)
+</details>
+
+<details>
+<summary><b>Connection Refused (HTTP/SSE)</b></summary>
 
 ```bash
 # Проверить, занят ли порт
 lsof -i :3000
 ```
 
-### Ошибки таймаута
+</details>
+
+<details>
+<summary><b>Ошибки таймаута</b></summary>
 
 Для больших репозиториев увеличьте таймаут:
 
@@ -456,7 +495,10 @@ lsof -i :3000
 CODEWIKI_REQUEST_TIMEOUT=60000 node dist/cli.js
 ```
 
-### NLP-резолвинг не работает
+</details>
+
+<details>
+<summary><b>NLP-резолвинг не работает</b></summary>
 
 Если естественный язык не резолвится, используйте явный формат:
 
@@ -469,7 +511,25 @@ https://github.com/fastify/fastify
 
 Установите `GITHUB_TOKEN`, чтобы избежать лимитов GitHub API для неаутентифицированных запросов.
 
-## Участие в разработке
+</details>
+
+---
+
+## 🧑‍💻 Разработка
+
+```bash
+npm run dev          # stdio через tsx
+npm run dev:http     # HTTP через tsx
+npm run dev:sse      # SSE через tsx
+npm run typecheck    # проверка типов
+npm run test         # запуск тестов
+npm run test:watch   # тесты в watch-режиме
+npm run build        # сборка в dist/
+```
+
+---
+
+## 🤝 Участие в разработке
 
 Мы приветствуем вклад! Пожалуйста:
 
@@ -479,6 +539,8 @@ https://github.com/fastify/fastify
 4. Запустите `npm run typecheck && npm run test` перед отправкой
 5. Откройте Pull Request
 
-## Лицензия
+---
 
-MIT
+## 📄 Лицензия
+
+[MIT](LICENSE) © codewiki-mcp contributors
