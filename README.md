@@ -4,8 +4,8 @@
 
 **MCP server for codewiki.google — search, fetch docs, and ask questions about any open-source repo**
 
-[![CI](https://github.com/nicholasxwang/codewiki-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/nicholasxwang/codewiki-mcp/actions/workflows/ci.yml)
-[![Release](https://github.com/nicholasxwang/codewiki-mcp/actions/workflows/release.yml/badge.svg)](https://github.com/nicholasxwang/codewiki-mcp/actions/workflows/release.yml)
+[![CI](https://github.com/izzzzzi/codewiki-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/izzzzzi/codewiki-mcp/actions/workflows/ci.yml)
+[![Release](https://github.com/izzzzzi/codewiki-mcp/actions/workflows/release.yml/badge.svg)](https://github.com/izzzzzi/codewiki-mcp/actions/workflows/release.yml)
 [![npm version](https://img.shields.io/npm/v/codewiki-mcp.svg?style=flat&colorA=18181B&colorB=28CF8D)](https://www.npmjs.com/package/codewiki-mcp)
 [![npm downloads](https://img.shields.io/npm/dm/codewiki-mcp.svg?style=flat&colorA=18181B&colorB=28CF8D)](https://www.npmjs.com/package/codewiki-mcp)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=flat&colorA=18181B&colorB=28CF8D)](LICENSE)
@@ -54,7 +54,7 @@ npx -y codewiki-mcp@latest
 ### From source
 
 ```bash
-git clone https://github.com/nicholasxwang/codewiki-mcp.git
+git clone https://github.com/izzzzzi/codewiki-mcp.git
 cd codewiki-mcp
 npm install
 npm run build
