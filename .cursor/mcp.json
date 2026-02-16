@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "codewiki-mcp": {
+      "command": "node",
+      "args": ["dist/cli.js"],
+      "cwd": "."
+    }
+  }
+}
