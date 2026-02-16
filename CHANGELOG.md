@@ -1,3 +1,10 @@
+## [1.0.1](https://github.com/izzzzzi/codewiki-mcp/compare/v1.0.0...v1.0.1) (2026-02-16)
+
+
+### Bug Fixes
+
+* **docs:** correct GitHub owner in badge URLs and clone links ([dbcaa48](https://github.com/izzzzzi/codewiki-mcp/commit/dbcaa48a8b3ebc99274fa8919ff1ee10ef89d4ac))
+
 # 1.0.0 (2026-02-16)
 
 
