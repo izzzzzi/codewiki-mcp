@@ -3,7 +3,7 @@
   "name": "io.github.izzzzzi/codewiki-mcp",
   "title": "CodeWiki MCP — AI-generated docs for GitHub repos",
   "description": "MCP server for codewiki.google: search repos, fetch wiki docs, ask questions",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "repository": {
     "url": "https://github.com/izzzzzi/codewiki-mcp",
     "source": "github"
@@ -13,7 +13,7 @@
       "registryType": "npm",
       "registryBaseUrl": "https://registry.npmjs.org",
       "identifier": "codewiki-mcp",
-      "version": "1.0.1",
+      "version": "1.1.0",
       "transport": { "type": "stdio" },
       "runtimeHint": "npx"
     }
