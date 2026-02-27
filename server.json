@@ -1,0 +1,21 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.izzzzzi/codewiki-mcp",
+  "title": "CodeWiki MCP — AI-generated docs for GitHub repos",
+  "description": "MCP server for codewiki.google: search repos, fetch wiki docs, ask questions",
+  "version": "1.0.1",
+  "repository": {
+    "url": "https://github.com/izzzzzi/codewiki-mcp",
+    "source": "github"
+  },
+  "packages": [
+    {
+      "registryType": "npm",
+      "registryBaseUrl": "https://registry.npmjs.org",
+      "identifier": "codewiki-mcp",
+      "version": "1.0.1",
+      "transport": { "type": "stdio" },
+      "runtimeHint": "npx"
+    }
+  ]
+}

@@ -1,11 +1,33 @@
 {
   "name": "codewiki-mcp",
   "version": "1.0.1",
+  "mcpName": "io.github.izzzzzi/codewiki-mcp",
   "description": "MCP server for codewiki.google",
   "type": "module",
+  "main": "dist/index.js",
   "bin": {
     "codewiki-mcp": "dist/cli.js"
   },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "keywords": [
+    "mcp",
+    "mcp-server",
+    "codewiki",
+    "documentation",
+    "github",
+    "ai",
+    "model-context-protocol"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/izzzzzi/codewiki-mcp.git"
+  },
+  "license": "MIT",
+  "homepage": "https://github.com/izzzzzi/codewiki-mcp",
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "dev": "tsx src/cli.ts",
