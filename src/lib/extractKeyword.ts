@@ -16,9 +16,44 @@ const STOP_WORDS = new Set([
   'of', 'in', 'to', 'on', 'at', 'by', 'up', 'it', 'its',
 ])
 
+const STOP_WORDS_RU = new Set([
+  'репозиторий', 'репо', 'библиотека', 'библиотеки', 'фреймворк', 'пакет', 'модуль',
+  'проект', 'инструмент', 'код', 'исходник', 'открытый',
+  'как', 'что', 'где', 'какой', 'какая', 'какие', 'какого', 'кто', 'когда', 'зачем', 'почему',
+  'такое', 'такой', 'такая', 'такие', 'таких', 'такого',
+  'покажи', 'расскажи', 'найди', 'найти', 'ищи', 'искать', 'получи', 'посмотри', 'дай',
+  'пожалуйста', 'можно', 'можешь', 'нужно', 'нужна', 'нужен', 'нужны',
+  'это', 'этот', 'эта', 'эти', 'этого', 'тот', 'та', 'те',
+  'для', 'про', 'при', 'или', 'его', 'её', 'мне', 'меня', 'себя',
+  'есть', 'был', 'была', 'были', 'быть', 'будет',
+  'все', 'всё', 'весь', 'вся', 'всех',
+  'из', 'на', 'по', 'за', 'от', 'до', 'об',
+  'не', 'ни', 'но', 'да', 'же', 'ли', 'бы',
+  'управления', 'управление', 'состоянием', 'состояние',
+  'работы', 'работа', 'устроен', 'устроена', 'работает',
+  'лучшая', 'лучший', 'лучшие', 'лучше', 'самый', 'самая', 'самые',
+])
+
 const SKIP_POS = new Set(['PUNCT', 'SPACE', 'DET', 'ADP', 'CCONJ', 'SCONJ', 'AUX', 'PART', 'INTJ'])
 
+const HAS_NON_LATIN = /[^\u0000-\u007F]/
+
+function extractKeywordSimple(text: string): string | null {
+  const tokens = text
+    .split(/[\s,.:;!?()[\]{}"'«»]+/)
+    .filter((t) => t.length > 1)
+    .filter((t) => !STOP_WORDS.has(t.toLowerCase()) && !STOP_WORDS_RU.has(t.toLowerCase()))
+
+  // Prefer Latin/mixed tokens (likely project names) over pure-Cyrillic tokens
+  const latin = tokens.filter((t) => /[a-zA-Z0-9]/.test(t))
+  return latin[0] ?? tokens[0] ?? null
+}
+
 export function extractKeyword(text: string): string | null {
+  if (HAS_NON_LATIN.test(text)) {
+    return extractKeywordSimple(text)
+  }
+
   const doc = nlp.readDoc(text)
   const tokens = doc.tokens()
 

@@ -17,10 +17,13 @@ export function normalizeRepoInput(input: string): NormalizedRepo {
 
   if (/^https?:\/\//i.test(raw)) {
     const url = new URL(raw)
+    if (url.hostname !== 'github.com') {
+      throw new Error(`Only GitHub repositories are supported, got host: ${url.hostname}`)
+    }
     const repoPath = url.pathname.replace(/^\/+|\/+$/g, '')
     const parts = repoPath.split('/').filter(Boolean)
     if (parts.length < 2) {
-      throw new Error('Expected repository URL in the format https://host/owner/repo')
+      throw new Error('Expected repository URL in the format https://github.com/owner/repo')
     }
 
     const normalizedPath = `${parts[0]}/${parts[1]}`

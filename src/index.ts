@@ -23,7 +23,7 @@ export { extractKeyword } from './lib/extractKeyword.js'
 export { resolveRepoFromGitHub } from './lib/resolveRepo.js'
 
 export { createMcpServer, startServer, stopServer } from './server.js'
-export type { ServerOptions } from './server.js'
+export type { ServerOptions, McpServerFactory } from './server.js'
 
 export { SearchReposInput, FetchRepoInput, AskRepoInput } from './schemas.js'
 

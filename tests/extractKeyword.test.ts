@@ -31,4 +31,34 @@ describe('extractKeyword', () => {
     const result = extractKeyword('')
     expect(result).toBeNull()
   })
+
+  it('extracts keyword from Russian query about state management', () => {
+    const result = extractKeyword('библиотеки для управления состоянием React')
+    expect(result).toBe('React')
+  })
+
+  it('extracts keyword from Russian query about routing', () => {
+    const result = extractKeyword('как устроен роутинг в Next.js')
+    expect(result).toBe('Next')
+  })
+
+  it('extracts keyword from mixed Russian/English query', () => {
+    const result = extractKeyword('покажи мне репозиторий fastify')
+    expect(result).toBe('fastify')
+  })
+
+  it('extracts C# from Russian query', () => {
+    const result = extractKeyword('что такое C# библиотека')
+    expect(result).toBe('C#')
+  })
+
+  it('returns null for all-Russian-stop-words query', () => {
+    const result = extractKeyword('библиотеки для управления состоянием')
+    expect(result).toBeNull()
+  })
+
+  it('prefers Latin token over Cyrillic in mixed query', () => {
+    const result = extractKeyword('роутинг в Next.js')
+    expect(result).toBe('Next')
+  })
 })

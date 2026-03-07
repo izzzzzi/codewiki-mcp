@@ -49,7 +49,6 @@ async function main(): Promise<void> {
   const endpoint = values.endpoint!
 
   const config = loadConfig()
-  const mcp = createMcpServer(config)
 
   const shutdown = async () => {
     await stopServer()
@@ -58,7 +57,12 @@ async function main(): Promise<void> {
   process.on('SIGTERM', shutdown)
   process.on('SIGINT', shutdown)
 
-  await startServer(mcp, { transport, port, endpoint })
+  if (transport === 'sse') {
+    await startServer(() => createMcpServer(config), { transport, port, endpoint })
+  } else {
+    const mcp = createMcpServer(config)
+    await startServer(mcp, { transport, port, endpoint })
+  }
 }
 
 main().catch((error) => {

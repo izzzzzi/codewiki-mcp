@@ -4,11 +4,17 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js'
 import { SSEServerTransport } from '@modelcontextprotocol/sdk/server/sse.js'
+import { readFileSync } from 'node:fs'
+import { fileURLToPath } from 'node:url'
+import { dirname, resolve } from 'node:path'
 import type { CodeWikiConfig } from './lib/config.js'
 import { CodeWikiClient } from './lib/codewikiClient.js'
 import { registerSearchReposTool } from './tools/searchRepos.js'
 import { registerFetchRepoTool } from './tools/fetchRepo.js'
 import { registerAskRepoTool } from './tools/askRepo.js'
+
+const __dirname = dirname(fileURLToPath(import.meta.url))
+const pkg = JSON.parse(readFileSync(resolve(__dirname, '..', 'package.json'), 'utf-8'))
 
 export interface ServerOptions {
   transport: 'stdio' | 'http' | 'sse'
@@ -16,12 +22,12 @@ export interface ServerOptions {
   endpoint?: string
 }
 
-const VERSION = '0.2.0'
+export type McpServerFactory = () => McpServer
 
 export function createMcpServer(config: CodeWikiConfig): McpServer {
   const mcp = new McpServer({
     name: 'codewiki-mcp',
-    version: VERSION,
+    version: pkg.version as string,
   })
 
   const client = CodeWikiClient.fromConfig(config)
@@ -35,12 +41,17 @@ export function createMcpServer(config: CodeWikiConfig): McpServer {
 
 let httpServer: Server | undefined
 
-export async function startServer(mcp: McpServer, options: ServerOptions): Promise<void> {
+export async function startServer(
+  mcpOrFactory: McpServer | McpServerFactory,
+  options: ServerOptions,
+): Promise<void> {
   const { transport, port = 3000, endpoint = '/mcp' } = options
+
+  const getMcp = typeof mcpOrFactory === 'function' ? mcpOrFactory : () => mcpOrFactory
 
   if (transport === 'stdio') {
     const stdioTransport = new StdioServerTransport()
-    await mcp.connect(stdioTransport)
+    await getMcp().connect(stdioTransport)
     return
   }
 
@@ -57,7 +68,7 @@ export async function startServer(mcp: McpServer, options: ServerOptions): Promi
       }
     })
 
-    await mcp.connect(httpTransport)
+    await getMcp().connect(httpTransport)
 
     await new Promise<void>((resolve) => {
       httpServer!.listen(port, () => {
@@ -69,6 +80,14 @@ export async function startServer(mcp: McpServer, options: ServerOptions): Promi
   }
 
   if (transport === 'sse') {
+    if (typeof mcpOrFactory !== 'function') {
+      throw new Error(
+        'SSE transport requires a McpServerFactory (a function returning a new McpServer) ' +
+        'because each SSE client needs its own McpServer instance. ' +
+        'Pass () => createMcpServer(config) instead of a single McpServer.',
+      )
+    }
+
     const sessions = new Map<string, SSEServerTransport>()
 
     httpServer = createServer(async (req, res) => {
@@ -82,7 +101,8 @@ export async function startServer(mcp: McpServer, options: ServerOptions): Promi
           sessions.delete(sseTransport.sessionId)
         }
 
-        await mcp.connect(sseTransport)
+        const sessionMcp = mcpOrFactory()
+        await sessionMcp.connect(sseTransport)
         return
       }
 

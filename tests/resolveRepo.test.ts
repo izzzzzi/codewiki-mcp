@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { resolveRepoFromGitHub } from '../src/lib/resolveRepo.js'
-import { resolveRepoInput } from '../src/lib/repo.js'
+import { normalizeRepoInput, resolveRepoInput } from '../src/lib/repo.js'
 
 describe('resolveRepoFromGitHub', () => {
   afterEach(() => {
@@ -75,5 +75,25 @@ describe('resolveRepoInput', () => {
 
     const result = await resolveRepoInput('the fastify web framework')
     expect(result.repoPath).toBe('fastify/fastify')
+  })
+
+  it('rejects non-GitHub URL', async () => {
+    await expect(
+      resolveRepoInput('https://gitlab.com/owner/repo'),
+    ).rejects.toThrow('Only GitHub repositories are supported')
+  })
+})
+
+describe('normalizeRepoInput', () => {
+  it('rejects non-GitHub host', () => {
+    expect(() => normalizeRepoInput('https://gitlab.com/owner/repo')).toThrow(
+      'Only GitHub repositories are supported',
+    )
+  })
+
+  it('accepts GitHub URL', () => {
+    const result = normalizeRepoInput('https://github.com/owner/repo')
+    expect(result.host).toBe('github.com')
+    expect(result.repoPath).toBe('owner/repo')
   })
 })
