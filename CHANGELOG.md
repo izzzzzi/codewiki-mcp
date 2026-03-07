@@ -1,3 +1,10 @@
+## [1.1.1](https://github.com/izzzzzi/codewiki-mcp/compare/v1.1.0...v1.1.1) (2026-03-07)
+
+
+### Bug Fixes
+
+* trigger patch release for SSE and keyword extraction fixes ([a66ebf9](https://github.com/izzzzzi/codewiki-mcp/commit/a66ebf9d2faa7f450ce6d7ca8cd24aaad48d1631))
+
 # [1.1.0](https://github.com/izzzzzi/codewiki-mcp/compare/v1.0.1...v1.1.0) (2026-02-27)
 
 
