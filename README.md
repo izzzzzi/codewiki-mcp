@@ -544,3 +544,8 @@ Contributions are welcome! Please:
 ## 📄 License
 
 [MIT](LICENSE) © codewiki-mcp contributors
+
+## Hosted deployment
+
+A hosted deployment is available on [Fronteir AI](https://fronteir.ai/mcp/izzzzzi-codewiki-mcp).
+
