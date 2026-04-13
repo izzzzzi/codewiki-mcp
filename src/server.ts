@@ -45,6 +45,10 @@ export async function startServer(
   mcpOrFactory: McpServer | McpServerFactory,
   options: ServerOptions,
 ): Promise<void> {
+  if (httpServer) {
+    throw new Error('Server is already running. Call stopServer() before starting a new one.')
+  }
+
   const { transport, port = 3000, endpoint = '/mcp' } = options
 
   const getMcp = typeof mcpOrFactory === 'function' ? mcpOrFactory : () => mcpOrFactory
