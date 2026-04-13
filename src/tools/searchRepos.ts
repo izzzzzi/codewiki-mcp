@@ -21,13 +21,14 @@ export function registerSearchReposTool(mcp: McpServer, client: CodeWikiClient):
         const { query, limit } = parsed.data
         const { data: items, meta } = await client.searchRepositories(query, limit)
 
+        const cleanItems = items.map(({ raw, ...rest }) => rest)
         return {
           content: [{
             type: 'text',
             text: JSON.stringify({
               query,
-              count: items.length,
-              items,
+              count: cleanItems.length,
+              items: cleanItems,
               meta,
             }, null, 2),
           }],
