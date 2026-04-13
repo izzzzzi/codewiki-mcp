@@ -96,4 +96,37 @@ describe('normalizeRepoInput', () => {
     expect(result.host).toBe('github.com')
     expect(result.repoPath).toBe('owner/repo')
   })
+
+  it('handles URL with trailing slash', () => {
+    const result = normalizeRepoInput('https://github.com/owner/repo/')
+    expect(result.repoPath).toBe('owner/repo')
+    expect(result.repoUrl).toBe('https://github.com/owner/repo')
+  })
+
+  it('handles URL with extra path segments', () => {
+    const result = normalizeRepoInput('https://github.com/owner/repo/tree/main/src')
+    expect(result.repoPath).toBe('owner/repo')
+  })
+
+  it('handles owner/repo with leading slash', () => {
+    const result = normalizeRepoInput('/owner/repo')
+    expect(result.repoPath).toBe('owner/repo')
+  })
+
+  it('handles owner/repo with trailing slash', () => {
+    const result = normalizeRepoInput('owner/repo/')
+    expect(result.repoPath).toBe('owner/repo')
+  })
+
+  it('throws on empty string', () => {
+    expect(() => normalizeRepoInput('')).toThrow('Repository input is empty')
+  })
+
+  it('throws on whitespace-only string', () => {
+    expect(() => normalizeRepoInput('   ')).toThrow('Repository input is empty')
+  })
+
+  it('throws on single-segment input', () => {
+    expect(() => normalizeRepoInput('owner')).toThrow('Expected repository in owner/repo format')
+  })
 })
