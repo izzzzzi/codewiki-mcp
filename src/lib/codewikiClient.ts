@@ -3,6 +3,11 @@ import { extractRpcPayload } from './batchexecute.js'
 import { CodeWikiError } from './errors.js'
 import { normalizeRepoInput } from './repo.js'
 
+/** RPC IDs for codewiki.google batchexecute endpoints */
+const RPC_SEARCH = 'vyWDAf'
+const RPC_FETCH = 'VSX6ub'
+const RPC_ASK = 'EgIxfe'
+
 export interface CodeWikiClientOptions {
   baseUrl?: string
   timeoutMs?: number
@@ -76,7 +81,7 @@ export class CodeWikiClient {
 
   async searchRepositories(query: string, limit = 10): Promise<WithMeta<SearchRepoResult[]>> {
     const start = performance.now()
-    const { payload, bytes } = await this.callRpc('vyWDAf', [query, limit, query, 0], { sourcePath: '/' })
+    const { payload, bytes } = await this.callRpc(RPC_SEARCH, [query, limit, query, 0], { sourcePath: '/' })
 
     const rows = Array.isArray(payload) && Array.isArray(payload[0])
       ? payload[0]
@@ -117,7 +122,7 @@ export class CodeWikiClient {
     const start = performance.now()
     const repo = normalizeRepoInput(repoInput)
 
-    const { payload, bytes } = await this.callRpc('VSX6ub', [repo.repoUrl], {
+    const { payload, bytes } = await this.callRpc(RPC_FETCH, [repo.repoUrl], {
       sourcePath: repo.sourcePath,
     })
 
@@ -194,7 +199,7 @@ export class CodeWikiClient {
       [question, 'user'],
     ]
 
-    const { payload, bytes } = await this.callRpc('EgIxfe', [messages, [null, repo.repoUrl]], {
+    const { payload, bytes } = await this.callRpc(RPC_ASK, [messages, [null, repo.repoUrl]], {
       sourcePath: repo.sourcePath,
     })
 
