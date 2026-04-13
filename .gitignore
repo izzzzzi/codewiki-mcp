@@ -5,3 +5,4 @@ coverage
 .playwright-mcp/
 .mcp.json
 .mcpregistry_*
+docs/superpowers/
