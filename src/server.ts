@@ -41,6 +41,7 @@ export function createMcpServer(config: CodeWikiConfig): McpServer {
 }
 
 let httpServer: Server | undefined
+let sessionCleanup: (() => Promise<void>) | undefined
 
 export async function startServer(
   mcpOrFactory: McpServer | McpServerFactory,
@@ -71,70 +72,84 @@ export async function startServer(
 
     const sessions = new Map<string, StreamableHTTPServerTransport>()
 
+    sessionCleanup = async () => {
+      for (const [id, transport] of sessions) {
+        try { await transport.close() } catch { /* ignore */ }
+        sessions.delete(id)
+      }
+    }
+
     httpServer = createServer(async (req, res) => {
-      const url = new URL(req.url ?? '/', `http://localhost:${port}`)
+      try {
+        const url = new URL(req.url ?? '/', `http://localhost:${port}`)
 
-      if (url.pathname !== endpoint) {
-        res.writeHead(404).end('Not Found')
-        return
+        if (url.pathname !== endpoint) {
+          res.writeHead(404).end('Not Found')
+          return
+        }
+
+        const sessionId = req.headers['mcp-session-id'] as string | undefined
+
+        if (req.method === 'GET' || req.method === 'DELETE') {
+          const transport = sessionId ? sessions.get(sessionId) : undefined
+          if (!transport) {
+            res.writeHead(400).end('Invalid or missing session ID')
+            return
+          }
+          await transport.handleRequest(req, res)
+          return
+        }
+
+        if (req.method === 'POST') {
+          if (sessionId && sessions.has(sessionId)) {
+            await sessions.get(sessionId)!.handleRequest(req, res)
+            return
+          }
+
+          // Parse body to check if this is an initialization request
+          const chunks: Buffer[] = []
+          for await (const chunk of req) {
+            chunks.push(typeof chunk === 'string' ? Buffer.from(chunk) : chunk)
+          }
+          const bodyText = Buffer.concat(chunks).toString('utf-8')
+          let body: unknown
+          try {
+            body = JSON.parse(bodyText)
+          } catch {
+            res.writeHead(400).end('Invalid JSON')
+            return
+          }
+
+          if (!isInitializeRequest(body)) {
+            res.writeHead(400).end('Bad Request: No valid session ID provided')
+            return
+          }
+
+          const httpTransport = new StreamableHTTPServerTransport({
+            sessionIdGenerator: () => randomUUID(),
+            onsessioninitialized: (id) => {
+              sessions.set(id, httpTransport)
+            },
+          })
+
+          httpTransport.onclose = () => {
+            const sid = httpTransport.sessionId
+            if (sid) sessions.delete(sid)
+          }
+
+          const sessionMcp = mcpOrFactory()
+          await sessionMcp.connect(httpTransport)
+          await httpTransport.handleRequest(req, res, body)
+          return
+        }
+
+        res.writeHead(405).end('Method Not Allowed')
+      } catch (error) {
+        console.error('Error handling MCP request:', error)
+        if (!res.headersSent) {
+          res.writeHead(500).end('Internal Server Error')
+        }
       }
-
-      const sessionId = req.headers['mcp-session-id'] as string | undefined
-
-      if (req.method === 'GET' || req.method === 'DELETE') {
-        const transport = sessionId ? sessions.get(sessionId) : undefined
-        if (!transport) {
-          res.writeHead(400).end('Invalid or missing session ID')
-          return
-        }
-        await transport.handleRequest(req, res)
-        return
-      }
-
-      if (req.method === 'POST') {
-        if (sessionId && sessions.has(sessionId)) {
-          await sessions.get(sessionId)!.handleRequest(req, res)
-          return
-        }
-
-        // Parse body to check if this is an initialization request
-        const chunks: Buffer[] = []
-        for await (const chunk of req) {
-          chunks.push(typeof chunk === 'string' ? Buffer.from(chunk) : chunk)
-        }
-        const bodyText = Buffer.concat(chunks).toString('utf-8')
-        let body: unknown
-        try {
-          body = JSON.parse(bodyText)
-        } catch {
-          res.writeHead(400).end('Invalid JSON')
-          return
-        }
-
-        if (!isInitializeRequest(body)) {
-          res.writeHead(400).end('Bad Request: No valid session ID provided')
-          return
-        }
-
-        const httpTransport = new StreamableHTTPServerTransport({
-          sessionIdGenerator: () => randomUUID(),
-          onsessioninitialized: (id) => {
-            sessions.set(id, httpTransport)
-          },
-        })
-
-        httpTransport.onclose = () => {
-          const sid = httpTransport.sessionId
-          if (sid) sessions.delete(sid)
-        }
-
-        const sessionMcp = mcpOrFactory()
-        await sessionMcp.connect(httpTransport)
-        await httpTransport.handleRequest(req, res, body)
-        return
-      }
-
-      res.writeHead(405).end('Method Not Allowed')
     })
 
     await new Promise<void>((resolve) => {
@@ -156,6 +171,13 @@ export async function startServer(
     }
 
     const sessions = new Map<string, SSEServerTransport>()
+
+    sessionCleanup = async () => {
+      for (const [id, transport] of sessions) {
+        try { await transport.close() } catch { /* ignore */ }
+        sessions.delete(id)
+      }
+    }
 
     httpServer = createServer(async (req, res) => {
       const url = new URL(req.url ?? '/', `http://localhost:${port}`)
@@ -198,6 +220,10 @@ export async function startServer(
 }
 
 export async function stopServer(): Promise<void> {
+  if (sessionCleanup) {
+    await sessionCleanup()
+    sessionCleanup = undefined
+  }
   if (httpServer) {
     await new Promise<void>((resolve, reject) => {
       httpServer!.close((err) => (err ? reject(err) : resolve()))
