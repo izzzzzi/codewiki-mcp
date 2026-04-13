@@ -67,6 +67,10 @@ export function extractWrbFrames(responseText: string): WrbFrame[] {
 
 export function extractRpcPayload(responseText: string, rpcId: string): unknown {
   const frames = extractWrbFrames(responseText)
-  const match = frames.find(frame => frame.rpcId === rpcId) ?? frames[0]
+  const match = frames.find(frame => frame.rpcId === rpcId)
+  if (!match) {
+    const available = frames.map(f => f.rpcId).join(', ')
+    throw new Error(`RPC ID "${rpcId}" not found in batchexecute response (available: ${available})`)
+  }
   return match.payload
 }

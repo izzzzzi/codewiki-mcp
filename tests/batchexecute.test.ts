@@ -39,4 +39,15 @@ describe('batchexecute parser', () => {
   it('throws when no wrb.fr frames found', () => {
     expect(() => extractWrbFrames(`)]}'\n42\n{}`)).toThrow('No wrb.fr frames found')
   })
+
+  it('throws when requested rpcId is not found among frames', () => {
+    const line = JSON.stringify([
+      ['wrb.fr', 'vyWDAf', JSON.stringify(['data']), null, null, null, 'generic'],
+    ])
+    const text = `)]}'\n${line}`
+
+    expect(() => extractRpcPayload(text, 'UNKNOWN_ID')).toThrow(
+      'RPC ID "UNKNOWN_ID" not found in batchexecute response',
+    )
+  })
 })
