@@ -4,6 +4,7 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js'
 import { SSEServerTransport } from '@modelcontextprotocol/sdk/server/sse.js'
+import { isInitializeRequest } from '@modelcontextprotocol/sdk/types.js'
 import { readFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { dirname, resolve } from 'node:path'
@@ -60,19 +61,81 @@ export async function startServer(
   }
 
   if (transport === 'http') {
-    const httpTransport = new StreamableHTTPServerTransport({
-      sessionIdGenerator: () => randomUUID(),
-    })
+    if (typeof mcpOrFactory !== 'function') {
+      throw new Error(
+        'HTTP transport requires a McpServerFactory (a function returning a new McpServer) ' +
+        'because each HTTP client needs its own McpServer instance. ' +
+        'Pass () => createMcpServer(config) instead of a single McpServer.',
+      )
+    }
+
+    const sessions = new Map<string, StreamableHTTPServerTransport>()
 
     httpServer = createServer(async (req, res) => {
-      if (req.url === endpoint) {
-        await httpTransport.handleRequest(req, res)
-      } else {
-        res.writeHead(404).end('Not Found')
-      }
-    })
+      const url = new URL(req.url ?? '/', `http://localhost:${port}`)
 
-    await getMcp().connect(httpTransport)
+      if (url.pathname !== endpoint) {
+        res.writeHead(404).end('Not Found')
+        return
+      }
+
+      const sessionId = req.headers['mcp-session-id'] as string | undefined
+
+      if (req.method === 'GET' || req.method === 'DELETE') {
+        const transport = sessionId ? sessions.get(sessionId) : undefined
+        if (!transport) {
+          res.writeHead(400).end('Invalid or missing session ID')
+          return
+        }
+        await transport.handleRequest(req, res)
+        return
+      }
+
+      if (req.method === 'POST') {
+        if (sessionId && sessions.has(sessionId)) {
+          await sessions.get(sessionId)!.handleRequest(req, res)
+          return
+        }
+
+        // Parse body to check if this is an initialization request
+        const chunks: Buffer[] = []
+        for await (const chunk of req) {
+          chunks.push(typeof chunk === 'string' ? Buffer.from(chunk) : chunk)
+        }
+        const bodyText = Buffer.concat(chunks).toString('utf-8')
+        let body: unknown
+        try {
+          body = JSON.parse(bodyText)
+        } catch {
+          res.writeHead(400).end('Invalid JSON')
+          return
+        }
+
+        if (!isInitializeRequest(body)) {
+          res.writeHead(400).end('Bad Request: No valid session ID provided')
+          return
+        }
+
+        const httpTransport = new StreamableHTTPServerTransport({
+          sessionIdGenerator: () => randomUUID(),
+          onsessioninitialized: (id) => {
+            sessions.set(id, httpTransport)
+          },
+        })
+
+        httpTransport.onclose = () => {
+          const sid = httpTransport.sessionId
+          if (sid) sessions.delete(sid)
+        }
+
+        const sessionMcp = mcpOrFactory()
+        await sessionMcp.connect(httpTransport)
+        await httpTransport.handleRequest(req, res, body)
+        return
+      }
+
+      res.writeHead(405).end('Method Not Allowed')
+    })
 
     await new Promise<void>((resolve) => {
       httpServer!.listen(port, () => {

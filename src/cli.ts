@@ -57,11 +57,11 @@ async function main(): Promise<void> {
   process.on('SIGTERM', shutdown)
   process.on('SIGINT', shutdown)
 
-  if (transport === 'sse') {
-    await startServer(() => createMcpServer(config), { transport, port, endpoint })
-  } else {
+  if (transport === 'stdio') {
     const mcp = createMcpServer(config)
     await startServer(mcp, { transport, port, endpoint })
+  } else {
+    await startServer(() => createMcpServer(config), { transport, port, endpoint })
   }
 }
 
